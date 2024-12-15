@@ -1,66 +1,338 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+DOCUMENTACION DE LA API DE PELICULAS/USUARIOS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Parte 1:
+Creamos un proyecto en laravel desde el cmd que se llama "LARAVEL-API", una vez que se haya creado, se visualizara la en el explorador de archivos la carpeta, pero ya con sus respectivos archivos asi como se muestra en la imagen a continuacion:
+![Imagen 1](<Captura de pantalla 2024-12-14 130458.png>)
+![Imagen 2](<Captura de pantalla 2024-12-14 130507.png>)
 
-## About Laravel
+Despues abrimos el Visual Studio Code, para estar trabajando con el proyecto que creamos y algo asi se debe de mostrar
+![Imagen 3](image.png)
+Una vez que ya esta todo listo los arhivos, ejecutamos el comando "php artisan serve", para visualizar que el servidor de laravel funciona correctamente 
+![Imagen 4](image-1.png)
+![Imagen 5](image-2.png)
+*******************************************************************************************************************************************
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Parte 2:
+Vamos a crear un archivo desde la carpeta "routes", que se llamara "api.php", donde estara las urls para cada componente, para que se obtenga los datos que se estara creando desde "Postman", por lo que al final debe de quedar asi: 
+![Imagen 6](image-3.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Una vez hecho eso, en el archivo ".env", se editara los siguientes datos, que se pondra el nombre de la base de datos, para que se vaya guardando la informacion de cada tabla que sera una API, en este caso, la base se llama "api_peliculas", el usuario sera "root", con mi respectiva contraseña para ingresar a mi base de datos. 
+![Imagen 7](image-5.png)
+Ahora hacemos la migracion mediante la terminal de laravel, con el comando "Php artisan migrate", por lo que se debera migrar todos sus componentes, y al finalizar debe quedar asi dentro de la base desde MySql. 
+![Imagen 8](image-4.png)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Ahora desde la carpeta "database", en la subcarpeta "migrations", tendra una archivo, donde se pondra todos las caracteristicas que debe de contener la tabla de peliculas, en este caso de la API peliculas. Esto se hace mediante el comando "php artisan make:migration create_peliculas_table", por lo que se creara y debera de contener lo siguiente:
+![Imagen 7](image-6.png)
 
-## Learning Laravel
+De igual forma se hace lo mismo para la tabla "Usuarios", que mediante el comando php artisan make:migration create_usuarios_table, se crea el archivo y debe de contener lo siguiente:
+![Imagen 8](image-7.png).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Despues de haber acompletado dichos archivos con sus respectivos componentes, en la terminal, se ejecuta el comando "php artisan migrate", para que se migre a la base de datos, por lo que ya debera de aparecer asi en MySql, tanto para Usuarios como Peliculas:
+![Imagen 9](image-8.png)
+![Imagen 10](image-9.png)
+*******************************************************************************************************************************************
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Parte 3: 
+Ahora, en la carpeta "Http\Controllers", con el comando "php artisan make:controller Api/peliculaController", se creara un archivo y ahi mismo debe de contener toda la estructura para el funcionamiento de la API pelicula, ya que desde ahi, se estara creando, modificando, eliminando, y se visualizara toda informacion de peliculas que se vayan haciendo, este es el codigo: 
+<?php
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+namespace App\Http\Controllers\Api;
 
-## Laravel Sponsors
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Pelicula;
+use Illuminate\Support\Facades\Validator;
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+class peliculaController extends Controller
+{
+    public function index(){
+        $peliculas = Pelicula::all();
+        if ($peliculas->isEmpty()){
+            return response()->json(['mensaje'=>'No hay peliculas registrados']
+            ,404);
 
-### Premium Partners
+        }
+        return response()->json($peliculas,200);
+    }
+    public function store(Request $requerimiento){
+        $validar=Validator::make($requerimiento->all(),[
+            'titulo'=>'required',
+            'fecha'=>'required|date',
+            'Descripcion'=>'required',
+            'Tipo'=>'required',
+            'urlImagen'=>'required|url'
+        ]);
+        if($validar->fails()){
+            $data=[
+                'mensaje'=>'Erros de validacion de datos',
+                'error'=>$validar->errors(),
+                'status'=>400
+            ];
+            return response()->json($data,400);
+        }
+        $pelicula=Pelicula::create([
+            'titulo'=>$requerimiento->input('titulo'),
+            'fecha'=>$requerimiento->input('fecha'),
+            'Descripcion'=>$requerimiento->input('Descripcion'),
+            'Tipo'=>$requerimiento->input('Tipo'),
+            'urlImagen'=>$requerimiento->input('urlImagen')
+        ]);
+        if(!$pelicula){
+            $data=[
+                'mensaje'=>'Erros de crear pelicula',
+                'status'=>500
+            ];
+            return response()->json($data,500);
+        }
+        $data=[
+            'pelicula' => $pelicula,
+            'status' =>201
+        ];
+        return response()->json($data,201);
+    }
+    public function show($id){
+        $pelicula=Pelicula::find($id);
+        if(!$pelicula){
+            $data=[
+                'mensaje'=>'Pelicula no encontrada',
+                'status'=>404
+            ];
+            return response()->json($data,404);
+        }
+        $data=[
+            'pelicula'=>$pelicula,
+            'status'=>200
+        ];
+        return response()->json($data,200);
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+    }
+    public function destroy($id){
+        $pelicula=Pelicula::find($id);
+        if(!$pelicula){
+            $data=[
+                'mensaje'=>'Pelicula no encontrada',
+                'status'=>404
+            ];
+            return response()->json($data,404);
+        }
+        $pelicula->delete();
+        $data=[
+            'mensaje'=>'Pelicula eliminada',
+            'status'=>200
+        ];
+        return response()->json($data,200);
 
-## Contributing
+    }
+    public function update(Request $requerimiento,$id){
+        $pelicula=Pelicula::find($id);
+        if(!$pelicula){
+            $data=[
+                'mensaje'=>'Pelicula no encontrada',
+                'status'=>404
+            ];
+            return response()->json($data,404);
+        }
+        $validar=Validator::make($requerimiento->all(),[
+            'titulo'=>'required',
+            'fecha'=>'required|date',
+            'Descripcion'=>'required',
+            'Tipo'=>'required',
+            'urlImagen'=>'required|url'
+        ]);
+        if($validar->fails()){
+            $data=[
+                'mensaje'=>'Erros de validacion de datos',
+                'error'=>$validar->errors(),
+                'status'=>400
+            ];
+            return response()->json($data,400);
+        }
+        $pelicula->titulo = $requerimiento->titulo;
+        $pelicula->fecha = $requerimiento->fecha;
+        $pelicula->Descripcion = $requerimiento->Descripcion;
+        $pelicula->Tipo = $requerimiento->Tipo;
+        $pelicula->urlImagen = $requerimiento->urlImagen;
+        $pelicula->save();
+        $data=[
+            'mensaje'=>'Pelicula actualizada',
+            'pelicula'=>$pelicula,
+            'status'=>200
+        ];
+        return response()->json($data,200);
+       
+    }
+    public function updateParcial(Request $requerimiento, $id)
+    {
+        $pelicula = Pelicula::find($id);
+        if (!$pelicula) {
+            $data = [
+                'mensaje' => 'Pelicula no encontrada',
+                'status' => 404
+            ];
+            return response()->json($data, 404);
+        }
+        if ($requerimiento->has('titulo')) {
+            $pelicula->titulo = $requerimiento->input('titulo');
+        }
+        if ($requerimiento->has('fecha')) {
+            $pelicula->fecha = $requerimiento->input('fecha');
+        }
+        if ($requerimiento->has('Descripcion')) {
+            $pelicula->Descripcion = $requerimiento->input('Descripcion');
+        }
+        if ($requerimiento->has('Tipo')) {
+            $pelicula->Tipo = $requerimiento->input('Tipo');
+        }
+        if ($requerimiento->has('urlImagen')) {
+            $pelicula->urlImagen = $requerimiento->input('urlImagen');
+        }
+        $pelicula->save();
+        $data = [
+            'mensaje' => 'Pelicula actualizada parcialmente',
+            'pelicula' => $pelicula,
+            'status' => 200
+        ];
+        return response()->json($data, 200);
+    }
+}
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+De igual forma asi se hizo para "Usuarios", solo que con distinta estructura, ya que se crea con el comando "php artisan make:controller Api/usuariosController", una vez creado debe de contener de crear, modificar, visualizar y eliminar: 
 
-## Code of Conduct
+<?php
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+namespace App\Http\Controllers\Api;
 
-## Security Vulnerabilities
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use Illuminate\Support\Facades\Validator;
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+class usuarioController extends Controller
+{
+    public function index()
+    {
+        $usuarios = Usuario::all();
+        if ($usuarios->isEmpty()) {
+            return response()->json(['mensaje' => 'No hay usuarios registrados'], 404);
+        }
+        return response()->json($usuarios, 200);
+    }
 
-## License
+    public function store(Request $requerimiento)
+    {
+        $validar = Validator::make($requerimiento->all(), [
+            'email' => 'required|email|unique:usuarios',
+            'password' => 'required|min:8',
+            'name' => 'required|string|max:255',
+            'role' => 'required|string',
+            'avatar' => 'nullable|url'
+        ]);
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+        if ($validar->fails()) {
+            $data = [
+                'mensaje' => 'Errores de validación de datos',
+                'error' => $validar->errors(),
+                'status' => 400
+            ];
+            return response()->json($data, 400);
+        }
+
+        $usuario = Usuario::create([
+            'email' => $requerimiento->input('email'),
+            'password' => bcrypt($requerimiento->input('password')),
+            'name' => $requerimiento->input('name'),
+            'role' => $requerimiento->input('role'),
+            'avatar' => $requerimiento->input('avatar')
+        ]);
+
+        $data = [
+            'usuario' => $usuario,
+            'status' => 201
+        ];
+        return response()->json($data, 201);
+    }
+
+    public function show($id)
+    {
+        $usuario = Usuario::find($id);
+        if (!$usuario) {
+            return response()->json(['mensaje' => 'Usuario no encontrado'], 404);
+        }
+        return response()->json($usuario, 200);
+    }
+
+    public function update(Request $requerimiento, $id)
+    {
+        $usuario = Usuario::find($id);
+        if (!$usuario) {
+            return response()->json(['mensaje' => 'Usuario no encontrado'], 404);
+        }
+
+        $validar = Validator::make($requerimiento->all(), [
+            'email' => 'nullable|email|unique:usuarios,email,' . $id,
+            'password' => 'nullable|min:8',
+            'name' => 'nullable|string|max:255',
+            'role' => 'nullable|string',
+            'avatar' => 'nullable|url'
+        ]);
+
+        if ($validar->fails()) {
+            $data = [
+                'mensaje' => 'Errores de validación de datos',
+                'error' => $validar->errors(),
+                'status' => 400
+            ];
+            return response()->json($data, 400);
+        }
+
+        $usuario->update(array_filter($requerimiento->all(), fn($value) => $value !== null));
+
+        return response()->json(['mensaje' => 'Usuario actualizado', 'usuario' => $usuario], 200);
+    }
+
+    public function updateParcial(Request $requerimiento, $id)
+    {
+        return $this->update($requerimiento, $id);
+    }
+
+    public function destroy($id)
+    {
+        $usuario = Usuario::find($id);
+        if (!$usuario) {
+            return response()->json(['mensaje' => 'Usuario no encontrado'], 404);
+        }
+
+        $usuario->delete();
+
+        return response()->json(['mensaje' => 'Usuario eliminado'], 200);
+    }
+}
+******************************************************************************************************************************************
+
+Parte 4:
+En la carpeta Models, solo se implementa los campos que debe de contener cada tabla, en este caso la API, esto se hace con el comando "php artisan make:model Pelicula", y debe de contener lo siguiente: 
+![Imagen 11](image-10.png)
+
+Y de igual forma asi se crea para "Usuario", mediante el siguiente comando "php artisan make:model Usuario", con lo que debe de contener lo siguiente: 
+
+![Imagen 12](image-11.png)
+
+*****************************************************************************************************************************************
+Ahora abriendo la aplicacion de postman, se pone el url "http://127.0.0.1:8000/api/peliculas", ahora se le pone la opcion de "post", para agregar una nueva pelicula. Por lo mientras no se tiene nada registrado como se muestra a continuacion: 
+
+![Imagen 11](image-12.png)
+
+Pero cuando creamos una nueva pelicula, ponemos los datos en base a los atributos de la tabla que se creo, con la opcion de post, y en automatico, se nos mostrara, asi como a continuacion:
+![Imagen 12](image-13.png)
+Y en el navegador se vera asi, en este caso ya se tiene los registros necesarios 
+![Imagen 13](image-14.png)
+
+Para los usuarios es lo mismo, desde postman ponemos la url, de "http://127.0.0.1:8000/api/usuarios", por el momento no se tiene registrado nada, por lo que se nos muestra ese mensaje en consola.
+![Imagen 14](image-15.png)
+
+Para ingresar los datos se hace de la siguiente forma, solo que con el tipo que sea "Post", para asi crear el primer registro de la API usuarios
+![Imagen 15](image-16.png)
+
+Una vez ya registrados todos los usuarios necesarios, mediante el get en postman se podran visualizar o en el mismo navegador con la url de usuarios, algo asi se mostrara: 
+
+![Imagen 16](image-17.png)

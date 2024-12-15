@@ -21,10 +21,10 @@ class peliculaController extends Controller
     public function store(Request $requerimiento){
         $validar=Validator::make($requerimiento->all(),[
             'titulo'=>'required',
-            'fecha'=>'required',
+            'fecha'=>'required|date',
             'Descripcion'=>'required',
             'Tipo'=>'required',
-            'urlImagen'=>'required'
+            'urlImagen'=>'required|url'
         ]);
         if($validar->fails()){
             $data=[
@@ -98,10 +98,10 @@ class peliculaController extends Controller
         }
         $validar=Validator::make($requerimiento->all(),[
             'titulo'=>'required',
-            'fecha'=>'required',
+            'fecha'=>'required|date',
             'Descripcion'=>'required',
             'Tipo'=>'required',
-            'urlImagen'=>'required'
+            'urlImagen'=>'required|url'
         ]);
         if($validar->fails()){
             $data=[
