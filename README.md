@@ -33,8 +33,12 @@ Despues de haber acompletado dichos archivos con sus respectivos componentes, en
 *******************************************************************************************************************************************
 
 Parte 3: 
-Ahora, en la carpeta "Http\Controllers", con el comando "php artisan make:controller Api/peliculaController", se creara un archivo y ahi mismo debe de contener toda la estructura para el funcionamiento de la API pelicula, ya que desde ahi, se estara creando, modificando, eliminando, y se visualizara toda informacion de peliculas que se vayan haciendo, este es el codigo: 
+Ahora, en la carpeta "Http\Controllers", con el comando "php artisan make:controller Api/peliculaController", se creara un archivo y ahi mismo debe de contener toda la estructura para el funcionamiento de la API pelicula, ya que desde ahi, se estara creando, modificando, eliminando, y se visualizara toda informacion de peliculas que se vayan haciendo, en la imagen se muestra una demostracion de como se implemento en codigo: 
 
+![Imagen 17](image-18.png)
+
+De igual forma, en la carpeta "Http\Controllers", con el comando "php artisan make:controller Api/usuarioController", se creara el archivo y ahi mismo debe de contener toda la estructura para el funcionamiento de la API usuario, ya que desde ahi, se estara creando, modificando, eliminando, y se visualizara toda informacion de usuarios que se vayan haciendo, en la imagen se muestra una demostracion de como se implemento en codigo: 
+![Imagen 18](image-19.png)
 ******************************************************************************************************************************************
 
 Parte 4:
