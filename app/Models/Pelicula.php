@@ -15,3 +15,5 @@ class Pelicula extends Model
         'urlImagen'
     ];
 }
+
+
